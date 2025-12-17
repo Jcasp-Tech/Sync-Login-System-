@@ -31,13 +31,20 @@ const authenticate = async (req, res, next) => {
     // If it's a refresh token, verify it exists in database and is not revoked
     if (decoded.type === 'refresh') {
       const tokenHash = hashToken(token);
-      const storedToken = await Token.findOne({
+      const tokenQuery = {
         user_id: decoded.userId,
         token_hash: tokenHash,
         token_type: 'Refresh',
         revoked: false,
         expires_at: { $gt: new Date() }
-      });
+      };
+
+      // If clientId is present in token (for service users), include it in the query
+      if (decoded.clientId) {
+        tokenQuery.client_id = decoded.clientId;
+      }
+
+      const storedToken = await Token.findOne(tokenQuery);
 
       if (!storedToken) {
         return res.status(401).json({
@@ -52,6 +59,11 @@ const authenticate = async (req, res, next) => {
       userId: decoded.userId,
       email: decoded.email
     };
+
+    // Attach clientId if present (for service users)
+    if (decoded.clientId) {
+      req.user.clientId = decoded.clientId;
+    }
 
     next();
   } catch (error) {

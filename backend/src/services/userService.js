@@ -86,7 +86,7 @@ const registerUser = async (clientId, userData, ipAddress, userAgent) => {
     user_agent: userAgent
   });
 
-  // Return user data and tokens
+  // Return user data and only accessToken (refreshToken is stored but not returned)
   return {
     user: {
       id: user.id,
@@ -98,9 +98,7 @@ const registerUser = async (clientId, userData, ipAddress, userAgent) => {
     },
     tokens: {
       accessToken,
-      refreshToken,
-      accessTokenExpiry: accessTokenExpiry.toISOString(),
-      refreshTokenExpiry: refreshTokenExpiry.toISOString()
+      accessTokenExpiry: accessTokenExpiry.toISOString()
     }
   };
 };
@@ -191,7 +189,7 @@ const loginUser = async (clientId, email, password, ipAddress, userAgent) => {
     user_agent: userAgent
   });
 
-  // Return user data and tokens
+  // Return user data and only accessToken (refreshToken is stored but not returned)
   return {
     user: {
       id: user.id,
@@ -202,26 +200,24 @@ const loginUser = async (clientId, email, password, ipAddress, userAgent) => {
     },
     tokens: {
       accessToken,
-      refreshToken,
-      accessTokenExpiry: accessTokenExpiry.toISOString(),
-      refreshTokenExpiry: refreshTokenExpiry.toISOString()
+      accessTokenExpiry: accessTokenExpiry.toISOString()
     }
   };
 };
 
 /**
- * Refresh access token using refresh token
+ * Refresh token using access token (returns only new refresh token)
  * @param {String} clientId - The client ID
- * @param {String} refreshToken - Refresh token
- * @returns {Promise<Object>} New tokens
+ * @param {String} accessToken - Access token
+ * @returns {Promise<Object>} New refresh token
  */
-const refreshAccessToken = async (clientId, refreshToken) => {
+const refreshAccessToken = async (clientId, accessToken) => {
   const { verifyToken } = require('../utils/jwtUtils');
 
-  // Verify refresh token
-  const decoded = verifyToken(refreshToken);
+  // Verify access token
+  const decoded = verifyToken(accessToken);
 
-  if (decoded.type !== 'refresh') {
+  if (decoded.type !== 'access') {
     throw new Error('Invalid token type');
   }
 
@@ -238,39 +234,22 @@ const refreshAccessToken = async (clientId, refreshToken) => {
     throw new Error('User not found');
   }
 
-  // Verify refresh token exists and is valid
-  const tokenHash = hashToken(refreshToken);
-  const storedToken = await Token.findOne({
-    user_id: decoded.userId,
-    client_id: clientId,
-    token_hash: tokenHash,
-    token_type: 'Refresh',
-    revoked: false,
-    expires_at: { $gt: new Date() }
-  });
-
-  if (!storedToken) {
-    throw new Error('Invalid or expired refresh token');
-  }
-
   // Revoke old refresh tokens for this user
   await Token.updateMany(
     { user_id: user.id, client_id: clientId, token_type: 'Refresh', revoked: false },
     { revoked: true }
   );
 
-  // Generate new tokens
+  // Generate new refresh token
   const tokenPayload = {
     userId: user.id,
     email: user.email,
     clientId: clientId
   };
 
-  const newAccessToken = generateAccessToken(tokenPayload);
   const newRefreshToken = generateRefreshToken(tokenPayload);
 
-  // Calculate expiry dates
-  const accessTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+  // Calculate expiry date
   const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
   // Store new refresh token hash in database
@@ -285,9 +264,7 @@ const refreshAccessToken = async (clientId, refreshToken) => {
   });
 
   return {
-    accessToken: newAccessToken,
     refreshToken: newRefreshToken,
-    accessTokenExpiry: accessTokenExpiry.toISOString(),
     refreshTokenExpiry: refreshTokenExpiry.toISOString()
   };
 };
@@ -318,21 +295,42 @@ const logoutUser = async (clientId, refreshToken, ipAddress, userAgent) => {
 
     const tokenHash = hashToken(refreshToken);
 
-    // Revoke the refresh token
+    // First verify the token exists and is not already revoked
+    const existingToken = await Token.findOne({
+      user_id: decoded.userId,
+      client_id: clientId,
+      token_hash: tokenHash,
+      token_type: 'Refresh',
+      revoked: false
+    });
+
+    if (!existingToken) {
+      throw new Error('Token not found or already revoked');
+    }
+
+    // Revoke the specific refresh token
     const result = await Token.updateOne(
       {
         user_id: decoded.userId,
         client_id: clientId,
         token_hash: tokenHash,
-        token_type: 'Refresh'
+        token_type: 'Refresh',
+        revoked: false // Only update if not already revoked
       },
       {
-        revoked: true
+        $set: {
+          revoked: true
+        }
       }
     );
 
     if (result.matchedCount === 0) {
-      throw new Error('Token not found');
+      throw new Error('Token not found or already revoked');
+    }
+
+    if (result.modifiedCount === 0) {
+      // Token was found but not modified (might already be revoked)
+      throw new Error('Token already revoked');
     }
 
     // Log logout
@@ -344,8 +342,11 @@ const logoutUser = async (clientId, refreshToken, ipAddress, userAgent) => {
       user_agent: userAgent
     });
   } catch (error) {
-    // If token is invalid, still return success to prevent token enumeration
-    throw new Error('Invalid refresh token');
+    // Re-throw the error with more context
+    if (error.message.includes('Invalid or expired token')) {
+      throw new Error('Invalid or expired refresh token');
+    }
+    throw error;
   }
 };
 

@@ -90,7 +90,7 @@ const login = async (req, res) => {
 };
 
 /**
- * Handle refresh token
+ * Handle refresh token (accepts accessToken, returns new refreshToken only)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
@@ -106,16 +106,16 @@ const refreshToken = async (req, res) => {
       });
     }
 
-    const { refreshToken } = req.body;
+    const { accessToken } = req.body;
 
-    if (!refreshToken) {
+    if (!accessToken) {
       return res.status(400).json({
         success: false,
-        message: 'Refresh token is required'
+        message: 'Access token is required'
       });
     }
 
-    const result = await userService.refreshAccessToken(clientId, refreshToken);
+    const result = await userService.refreshAccessToken(clientId, accessToken);
 
     res.status(200).json({
       success: true,
@@ -191,15 +191,21 @@ const getProfile = async (req, res) => {
       });
     }
 
-    // Get user ID from JWT token (if authenticated via JWT)
-    // For now, we'll get it from request body or query params
-    // In a real scenario, you might want to add JWT authentication middleware
-    const { userId } = req.body;
+    // Get user ID from refresh token (set by validateAccessKeyAndRefreshToken middleware)
+    const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: 'User ID is required'
+        message: 'User authentication required'
+      });
+    }
+
+    // Verify clientId matches
+    if (req.user.clientId !== clientId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
       });
     }
 
