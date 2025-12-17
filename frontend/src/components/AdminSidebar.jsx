@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Home, LayoutDashboard, BarChart3, Users, FileText, Settings, Key, X } from 'lucide-react'
+import { Home, LayoutDashboard, Server, Key, FileText, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function AdminSidebar({ activeSection, onSectionChange, isOpen = true, onClose }) {
@@ -7,10 +7,9 @@ export default function AdminSidebar({ activeSection, onSectionChange, isOpen = 
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'users', label: 'Users', icon: Users },
+    { id: 'services', label: 'Services', icon: Server },
+    { id: 'api-docs', label: 'API Docs', icon: FileText },
     { id: 'api-keys', label: 'API Keys', icon: Key },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
   return (

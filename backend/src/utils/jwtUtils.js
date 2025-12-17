@@ -11,19 +11,22 @@ const JWT_REFRESH_EXPIRY = process.env.JWT_REFRESH_EXPIRY || '7d';
  * @returns {String} JWT access token
  */
 const generateAccessToken = (payload) => {
-  return jwt.sign(
-    {
-      userId: payload.userId,
-      email: payload.email,
-      type: 'access'
-    },
-    JWT_SECRET,
-    {
-      expiresIn: JWT_ACCESS_EXPIRY,
-      issuer: 'auth-service',
-      audience: 'client-app'
-    }
-  );
+  const tokenData = {
+    userId: payload.userId,
+    email: payload.email,
+    type: 'access'
+  };
+  
+  // Include clientId if provided (for service users)
+  if (payload.clientId) {
+    tokenData.clientId = payload.clientId;
+  }
+  
+  return jwt.sign(tokenData, JWT_SECRET, {
+    expiresIn: JWT_ACCESS_EXPIRY,
+    issuer: 'auth-service',
+    audience: 'client-app'
+  });
 };
 
 /**
@@ -32,19 +35,22 @@ const generateAccessToken = (payload) => {
  * @returns {String} JWT refresh token
  */
 const generateRefreshToken = (payload) => {
-  return jwt.sign(
-    {
-      userId: payload.userId,
-      email: payload.email,
-      type: 'refresh'
-    },
-    JWT_SECRET,
-    {
-      expiresIn: JWT_REFRESH_EXPIRY,
-      issuer: 'auth-service',
-      audience: 'client-app'
-    }
-  );
+  const tokenData = {
+    userId: payload.userId,
+    email: payload.email,
+    type: 'refresh'
+  };
+  
+  // Include clientId if provided (for service users)
+  if (payload.clientId) {
+    tokenData.clientId = payload.clientId;
+  }
+  
+  return jwt.sign(tokenData, JWT_SECRET, {
+    expiresIn: JWT_REFRESH_EXPIRY,
+    issuer: 'auth-service',
+    audience: 'client-app'
+  });
 };
 
 /**

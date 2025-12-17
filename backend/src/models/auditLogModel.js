@@ -2,9 +2,13 @@ const mongoose = require('mongoose');
 
 const auditLogSchema = new mongoose.Schema({
   user_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Client',
+    type: mongoose.Schema.Types.Mixed, // Can be ObjectId (for clients) or String (for service users)
     default: null, // Nullable for failed attempts
+    index: true
+  },
+  client_id: {
+    type: String,
+    required: true,
     index: true
   },
   action: {
@@ -28,6 +32,8 @@ const auditLogSchema = new mongoose.Schema({
 
 // Index for faster queries
 auditLogSchema.index({ user_id: 1, action: 1 });
+auditLogSchema.index({ client_id: 1, action: 1 });
+auditLogSchema.index({ client_id: 1, created_at: -1 }); // For client-specific recent logs
 auditLogSchema.index({ created_at: -1 }); // For recent logs queries
 
 const AuditLog = mongoose.model('AuditLog', auditLogSchema);

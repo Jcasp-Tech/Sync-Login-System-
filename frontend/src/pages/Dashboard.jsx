@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react'
 import AdminSidebar from '@/components/AdminSidebar'
 import Header from '@/components/Header'
 import DashboardOverview from '@/components/DashboardOverview'
-import AnalyticsChart from '@/components/AnalyticsChart'
-import UsersTable from '@/components/UsersTable'
+import ServicesList from '@/components/ServicesList'
 import ApiKeyGenerator from '@/components/ApiKeyGenerator'
-import SettingsPanel from '@/components/SettingsPanel'
+import ApiDocs from '@/pages/ApiDocs'
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -34,32 +33,18 @@ export default function Dashboard() {
               </p>
             </div>
             <DashboardOverview />
-            <AnalyticsChart />
           </div>
         )
-      case 'analytics':
+      case 'services':
         return (
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Analytics</h1>
+              <h1 className="text-3xl font-bold mb-2">Microservices</h1>
               <p className="text-muted-foreground mb-6">
-                View detailed analytics and insights
+                View and manage all your microservices
               </p>
             </div>
-            <AnalyticsChart />
-            <DashboardOverview />
-          </div>
-        )
-      case 'users':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Users</h1>
-              <p className="text-muted-foreground mb-6">
-                Manage user accounts and permissions
-              </p>
-            </div>
-            <UsersTable />
+            <ServicesList onNavigateToDocs={setActiveSection} />
           </div>
         )
       case 'api-keys':
@@ -74,18 +59,8 @@ export default function Dashboard() {
             <ApiKeyGenerator />
           </div>
         )
-      case 'settings':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Settings</h1>
-              <p className="text-muted-foreground mb-6">
-                Manage your account settings and preferences
-              </p>
-            </div>
-            <SettingsPanel />
-          </div>
-        )
+      case 'api-docs':
+        return <ApiDocs />
       default:
         return null
     }

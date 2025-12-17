@@ -2,8 +2,12 @@ const mongoose = require('mongoose');
 
 const tokenSchema = new mongoose.Schema({
   user_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Client',
+    type: mongoose.Schema.Types.Mixed, // Can be ObjectId (for clients) or String (for service users)
+    required: true,
+    index: true
+  },
+  client_id: {
+    type: String,
     required: true,
     index: true
   },
@@ -32,6 +36,7 @@ const tokenSchema = new mongoose.Schema({
 
 // Index for faster queries
 tokenSchema.index({ user_id: 1, token_type: 1 });
+tokenSchema.index({ client_id: 1, user_id: 1 });
 tokenSchema.index({ expires_at: 1 }, { expireAfterSeconds: 0 }); // TTL index for auto-deletion
 
 const Token = mongoose.model('Token', tokenSchema);

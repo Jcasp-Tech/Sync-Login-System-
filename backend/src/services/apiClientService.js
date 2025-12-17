@@ -91,6 +91,40 @@ const validateClientCredentials = async (access_key_id, access_key_secret) => {
 };
 
 /**
+ * Validate access key by ID only (no secret required from client)
+ * Backend handles secret validation internally
+ * @param {String} access_key_id - Access key ID
+ * @returns {Promise<Object>} Service access key data if valid
+ */
+const validateAccessKeyById = async (access_key_id) => {
+  if (!access_key_id) {
+    throw new Error('Access key ID is required');
+  }
+
+  // Find access key by ID
+  const serviceAccessKey = await ServiceAccessKey.findOne({
+    access_key_id: access_key_id.trim(),
+    is_active: true,
+    revoked_at: null
+  });
+
+  if (!serviceAccessKey) {
+    throw new Error('Invalid access key');
+  }
+
+  // Return access key data (without secret hash)
+  return {
+    id: serviceAccessKey.id,
+    access_key_id: serviceAccessKey.access_key_id,
+    client_id: serviceAccessKey.client_id,
+    environment: serviceAccessKey.environment,
+    rate_limit: serviceAccessKey.rate_limit,
+    is_active: serviceAccessKey.is_active,
+    created_at: serviceAccessKey.createdAt
+  };
+};
+
+/**
  * Revoke an access key (hard delete - permanently removes the record)
  * @param {String} access_key_id - Access key ID to revoke
  * @param {String} client_id - Client ID (for authorization check)
@@ -158,6 +192,7 @@ const getClientAccessKeys = async (client_id) => {
 module.exports = {
   generateClientCredentials,
   validateClientCredentials,
+  validateAccessKeyById,
   revokeAccessKey,
   getClientAccessKeys
 };

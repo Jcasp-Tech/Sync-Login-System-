@@ -1,4 +1,4 @@
-const { Client, Token } = require('../models');
+const { Client, Token, AuditLog } = require('../models');
 const { hashPassword, verifyPassword } = require('../utils/passwordUtils');
 const { generateAccessToken, generateRefreshToken, hashToken } = require('../utils/jwtUtils');
 
@@ -94,7 +94,7 @@ const loginUser = async (email, password) => {
 
   // Revoke old refresh tokens for this client
   await Token.updateMany(
-    { user_id: client._id, token_type: 'Refresh', revoked: false },
+    { user_id: client._id, client_id: client.id, token_type: 'Refresh', revoked: false },
     { revoked: true }
   );
 
@@ -102,6 +102,7 @@ const loginUser = async (email, password) => {
   const refreshTokenHash = hashToken(refreshToken);
   await Token.create({
     user_id: client._id,
+    client_id: client.id, // Use client's UUID as client_id
     token_type: 'Refresh',
     token_hash: refreshTokenHash,
     expires_at: refreshTokenExpiry,
@@ -149,7 +150,7 @@ const refreshAccessToken = async (accessToken) => {
 
   // Revoke old refresh tokens for this client
   await Token.updateMany(
-    { user_id: client._id, token_type: 'Refresh', revoked: false },
+    { user_id: client._id, client_id: client.id, token_type: 'Refresh', revoked: false },
     { revoked: true }
   );
 
@@ -168,6 +169,7 @@ const refreshAccessToken = async (accessToken) => {
   const refreshTokenHash = hashTokenUtil(newRefreshToken);
   await Token.create({
     user_id: client._id,
+    client_id: client.id, // Use client's UUID as client_id
     token_type: 'Refresh',
     token_hash: refreshTokenHash,
     expires_at: refreshTokenExpiry,
@@ -198,10 +200,17 @@ const logoutUser = async (refreshToken) => {
     
     const tokenHash = hashToken(refreshToken);
     
+    // Get client to get client_id
+    const client = await Client.findById(decoded.userId);
+    if (!client) {
+      throw new Error('Client not found');
+    }
+
     // Revoke the refresh token
     const result = await Token.updateOne(
       {
         user_id: decoded.userId,
+        client_id: client.id,
         token_hash: tokenHash,
         token_type: 'Refresh'
       },

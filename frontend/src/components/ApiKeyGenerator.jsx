@@ -72,16 +72,18 @@ export default function ApiKeyGenerator() {
 
       // Handle response structure: response.data contains the key info
       const keyData = response.data || response
+      const accessKeyId = keyData.access_key_id || keyData.id || keyData.accessKeyId
       const accessKeySecret = keyData.access_key_secret || keyData.access_key || keyData.key || keyData.accessKey || keyData.apiKey
 
-      if (accessKeySecret) {
-        // Copy to clipboard automatically
-        navigator.clipboard.writeText(accessKeySecret)
+      if (accessKeyId && accessKeySecret) {
+        // Copy Authorization header to clipboard automatically
+        const authHeader = `Authorization: AccessKey ${accessKeyId}:${accessKeySecret}`
+        navigator.clipboard.writeText(authHeader)
         
         // Show success toast
         toast({
           title: "API Key Generated Successfully",
-          description: "Your API key has been generated and copied to clipboard. Store it securely - it won't be shown again.",
+          description: "Your API keys have been generated. Authorization header copied to clipboard. Store it securely - the secret won't be shown again.",
           variant: "success",
           duration: 6000,
         })
@@ -144,6 +146,26 @@ export default function ApiKeyGenerator() {
     navigator.clipboard.writeText(key)
     setCopiedId(id)
     setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const copyAuthorizationHeader = (accessKeyId, accessKeySecret, id) => {
+    if (!accessKeyId || !accessKeySecret) {
+      toast({
+        title: "Error",
+        description: "Both access key ID and secret are required",
+        variant: "destructive",
+      })
+      return
+    }
+    const authHeader = `Authorization: AccessKey ${accessKeyId}:${accessKeySecret}`
+    navigator.clipboard.writeText(authHeader)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
+    toast({
+      title: "Copied",
+      description: "Authorization header copied to clipboard",
+      variant: "success",
+    })
   }
 
   const formatDate = (dateString) => {
@@ -240,8 +262,6 @@ export default function ApiKeyGenerator() {
               {apiKeys.map((apiKey) => {
                 // Handle different possible response structures
                 const accessKeyId = apiKey.access_key_id || apiKey.id || apiKey.accessKeyId
-                // Note: access_key_secret is only shown once after generation
-                // In the list, we typically only show access_key_id
                 const accessKeySecret = apiKey.access_key_secret || apiKey.access_key || apiKey.key || apiKey.accessKey || apiKey.apiKey
                 const env = apiKey.environment || apiKey.env || 'unknown'
                 const rateLimit = apiKey.rate_limit || apiKey.rateLimit
@@ -251,10 +271,10 @@ export default function ApiKeyGenerator() {
                 return (
                   <div
                     key={accessKeyId}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    className="p-4 border rounded-lg space-y-4"
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
                         <Badge variant={env === 'live' ? 'default' : 'secondary'}>
                           {env.toUpperCase()}
                         </Badge>
@@ -264,41 +284,113 @@ export default function ApiKeyGenerator() {
                           </span>
                         )}
                       </div>
-                      <p className="font-mono text-sm text-muted-foreground mb-1 break-all">
-                        {accessKeySecret || accessKeyId}
-                      </p>
-                      <div className="flex gap-4 text-xs text-muted-foreground">
-                        {createdAt && <span>Created: {formatDate(createdAt)}</span>}
-                        {lastUsed && <span>Last used: {formatDate(lastUsed)}</span>}
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {(accessKeySecret || accessKeyId) && (
+                      <div className="flex gap-2">
+                        {accessKeyId && accessKeySecret && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => copyAuthorizationHeader(accessKeyId, accessKeySecret, `auth-${accessKeyId}`)}
+                          >
+                            {copiedId === `auth-${accessKeyId}` ? (
+                              <>
+                                <Check className="w-4 h-4 mr-2" />
+                                Copied
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Copy Auth Header
+                              </>
+                            )}
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => copyToClipboard(accessKeySecret || accessKeyId, accessKeyId)}
+                          onClick={() => openDeleteDialog(accessKeyId)}
+                          disabled={deleting === accessKeyId || deleteDialogOpen}
+                          className="text-destructive hover:text-destructive"
                         >
-                          {copiedId === accessKeyId ? (
-                            <Check className="w-4 h-4" />
+                          {deleting === accessKeyId ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
-                            <Copy className="w-4 h-4" />
+                            'Delete'
                           )}
                         </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {accessKeyId && (
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-1 block">Access Key ID</Label>
+                          <div className="flex items-center gap-2">
+                            <code className="flex-1 p-2 bg-muted rounded text-sm font-mono break-all">
+                              {accessKeyId}
+                            </code>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(accessKeyId, `id-${accessKeyId}`)}
+                            >
+                              {copiedId === `id-${accessKeyId}` ? (
+                                <Check className="w-4 h-4" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openDeleteDialog(accessKeyId)}
-                        disabled={deleting === accessKeyId || deleteDialogOpen}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        {deleting === accessKeyId ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          'Delete'
-                        )}
-                      </Button>
+
+                      {accessKeySecret && (
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-1 block">Access Key Secret</Label>
+                          <div className="flex items-center gap-2">
+                            <code className="flex-1 p-2 bg-muted rounded text-sm font-mono break-all">
+                              {accessKeySecret}
+                            </code>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(accessKeySecret, `secret-${accessKeyId}`)}
+                            >
+                              {copiedId === `secret-${accessKeyId}` ? (
+                                <Check className="w-4 h-4" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {accessKeyId && accessKeySecret && (
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-1 block">Authorization Header</Label>
+                          <div className="flex items-center gap-2">
+                            <code className="flex-1 p-2 bg-muted rounded text-sm font-mono break-all">
+                              Authorization: AccessKey {accessKeyId}:{accessKeySecret}
+                            </code>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyAuthorizationHeader(accessKeyId, accessKeySecret, `header-${accessKeyId}`)}
+                            >
+                              {copiedId === `header-${accessKeyId}` ? (
+                                <Check className="w-4 h-4" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-4 text-xs text-muted-foreground pt-2 border-t">
+                      {createdAt && <span>Created: {formatDate(createdAt)}</span>}
+                      {lastUsed && <span>Last used: {formatDate(lastUsed)}</span>}
                     </div>
                   </div>
                 )

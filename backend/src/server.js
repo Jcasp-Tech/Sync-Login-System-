@@ -3,7 +3,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const connectDB = require('./config/database');
-const { authRoutes, apiClientRoutes } = require('./routes');
+const { authRoutes, apiClientRoutes, serviceAuthRoutes } = require('./routes');
 const { errorHandlerMiddleware } = require('./middlewares');
 const apiEndpoints = require('./config/apiEndpoints');
 
@@ -28,8 +28,9 @@ connectDB();
 app.use('/api/v1/client/auth', authRoutes);
 // API Client Management routes (for generating access keys)
 app.use('/api/v1/client/auth/api-clients', apiClientRoutes);
-// Service API routes (for future use)
-// app.use('/api/v1/service/auth', serviceAuthRoutes);
+// Service API routes (for user registration/login via access keys)
+app.use('/api/v1/service/auth', serviceAuthRoutes);
+console.log('Service auth routes mounted at /api/v1/service/auth');
 
 // Root route - API Endpoints Information
 app.get('/', (req, res) => {
