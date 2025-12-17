@@ -3,4 +3,5 @@ module.exports = {
     Token: require('./tokenModel'),
     AuditLog: require('./auditLogModel'),
     ServiceAccessKey: require('./serviceAccessKeyModel'),
+    EmailVerificationToken: require('./emailVerificationTokenModel'),
 };

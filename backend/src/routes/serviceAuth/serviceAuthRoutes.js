@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../../controllers/userController');
+const emailVerificationController = require('../../controllers/emailVerificationController');
 const { validateAccessKey, validateAccessKeyAndRefreshToken } = require('../../middlewares/accessKeyMiddleware');
 const {
   validateServiceUserRegister,
   validateServiceUserLogin,
   validateServiceRefreshToken,
   validateServiceLogout,
+  validateSendVerificationEmail,
+  validateVerifyEmail,
   handleValidationErrors
 } = require('../../middlewares/validationMiddleware');
 const rateLimit = require('express-rate-limit');
@@ -102,6 +105,34 @@ router.post(
   '/profile',
   validateAccessKeyAndRefreshToken, // Validate both access key and refresh token
   userController.getProfile
+);
+
+/**
+ * @route   POST /api/v1/service/auth/send-verification-email
+ * @desc    Send verification email to service user (requires access key)
+ * @access  Private (Access key required)
+ */
+router.post(
+  '/send-verification-email',
+  validateAccessKey,
+  registerLimiter,
+  validateSendVerificationEmail,
+  handleValidationErrors,
+  emailVerificationController.sendUserVerificationEmail
+);
+
+/**
+ * @route   POST /api/v1/service/auth/verify-email
+ * @desc    Verify service user email with token (requires access key)
+ * @access  Private (Access key required)
+ */
+router.post(
+  '/verify-email',
+  validateAccessKey,
+  registerLimiter,
+  validateVerifyEmail,
+  handleValidationErrors,
+  emailVerificationController.verifyUserEmail
 );
 
 module.exports = router;

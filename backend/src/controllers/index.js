@@ -1,3 +1,4 @@
 module.exports = {
-  authController: require('./authController')
+  authController: require('./authController'),
+  emailVerificationController: require('./emailVerificationController')
 };
