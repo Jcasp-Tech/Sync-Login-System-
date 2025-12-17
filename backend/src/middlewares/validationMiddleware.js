@@ -176,6 +176,36 @@ const validateServiceLogout = [
 ];
 
 /**
+ * Validation rules for sending verification email
+ */
+const validateSendVerificationEmail = [
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail()
+    .toLowerCase()
+    .isLength({ max: 255 })
+    .withMessage('Email must not exceed 255 characters')
+];
+
+/**
+ * Validation rules for verifying email token
+ */
+const validateVerifyEmail = [
+  body('token')
+    .trim()
+    .notEmpty()
+    .withMessage('Verification token is required')
+    .isString()
+    .withMessage('Verification token must be a string')
+    .isLength({ min: 32, max: 200 })
+    .withMessage('Verification token must be between 32 and 200 characters')
+];
+
+/**
  * Middleware to handle validation errors
  */
 const handleValidationErrors = (req, res, next) => {
@@ -204,6 +234,8 @@ module.exports = {
   validateServiceUserLogin,
   validateServiceRefreshToken,
   validateServiceLogout,
+  validateSendVerificationEmail,
+  validateVerifyEmail,
   handleValidationErrors
 };
 

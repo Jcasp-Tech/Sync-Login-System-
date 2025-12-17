@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../../controllers/authController');
+const emailVerificationController = require('../../controllers/emailVerificationController');
 const { loginRateLimiter, registerRateLimiter, refreshTokenRateLimiter } = require('../../middlewares/rateLimiterMiddleware');
 const { 
   validateRegister,
   validateLogin, 
   validateRefreshToken, 
   validateLogout,
+  validateSendVerificationEmail,
+  validateVerifyEmail,
   handleValidationErrors 
 } = require('../../middlewares/validationMiddleware');
 const { authenticate } = require('../../middlewares/authMiddleware');
@@ -60,6 +63,32 @@ router.post(
   validateLogout,
   handleValidationErrors,
   authController.logout
+);
+
+/**
+ * @route   POST /api/v1/client/auth/send-verification-email
+ * @desc    Send verification email to client
+ * @access  Public
+ */
+router.post(
+  '/send-verification-email',
+  registerRateLimiter, // Use register rate limiter for email sending
+  validateSendVerificationEmail,
+  handleValidationErrors,
+  emailVerificationController.sendClientVerificationEmail
+);
+
+/**
+ * @route   POST /api/v1/client/auth/verify-email
+ * @desc    Verify client email with token
+ * @access  Public
+ */
+router.post(
+  '/verify-email',
+  registerRateLimiter, // Use register rate limiter for email verification
+  validateVerifyEmail,
+  handleValidationErrors,
+  emailVerificationController.verifyClientEmail
 );
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const { Client, Token, AuditLog } = require('../models');
 const { hashPassword, verifyPassword } = require('../utils/passwordUtils');
 const { generateAccessToken, generateRefreshToken, hashToken } = require('../utils/jwtUtils');
+const { sendClientVerificationEmail } = require('./emailVerificationService');
 
 /**
  * Register a new client
@@ -38,6 +39,15 @@ const registerUser = async (clientData) => {
     password_hash,
     is_email_verified: false // Default to false, can be updated after email verification
   });
+
+  // Send verification email (fire and forget - don't block registration if email fails)
+  try {
+    await sendClientVerificationEmail(client.id, client.email_address, client.full_name);
+  } catch (emailError) {
+    // Log error but don't fail registration
+    console.error('Failed to send verification email after registration:', emailError.message);
+    // Registration still succeeds, user can request verification email later
+  }
 
   // Return client data without password
   return {

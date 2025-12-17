@@ -1,0 +1,266 @@
+# ============================================
+# 🔒 CRITICAL: Environment Variables & Secrets
+# ============================================
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+.env.*.local
+.env.backup
+*.env
+*.env.*
+
+# Private Keys & Certificates
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+*.cer
+*.jks
+secrets/
+*.secret
+credentials.json
+api-keys.json
+tokens.json
+
+# ============================================
+# Node.js Dependencies
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn/
+.pnp.*
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+package-lock.json.backup
+
+# ============================================
+# Logs & Debug Files
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+log/
+*.log.*
+debug.log
+error.log
+combined.log
+
+# ============================================
+# Database Files
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-shm
+*.db-wal
+data/
+mongodb-data/
+*.dump
+*.sql
+backup/
+*.backup
+
+# ============================================
+# Build & Distribution
+# ============================================
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+*.tsbuildinfo
+*.build
+lib/
+coverage/
+
+# ============================================
+# Testing
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+test-results/
+playwright-report/
+.vscode-test/
+*.test.js.snap
+
+# ============================================
+# IDE & Editor Files
+# ============================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains IDEs (WebStorm, IntelliJ, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs
+*~
+\#*\#
+.\#*
+.directory
+
+# ============================================
+# OS Files
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+*.exe
+
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+.cache/
+tmp/
+temp/
+.tmp/
+
+# ============================================
+# Application Specific
+# ============================================
+# Upload directories
+uploads/
+public/uploads/
+static/uploads/
+
+# Session files
+sessions/
+*.session
+
+# SSL Certificates
+ssl/
+certs/
+*.pem
+*.key
+*.crt
+
+# Email attachments/temp
+email-attachments/
+email-temp/
+
+# ============================================
+# Deployment & Cloud
+# ============================================
+.vercel
+.netlify
+.serverless/
+.fusebox/
+.dynamodb/
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# ============================================
+# Miscellaneous
+# ============================================
+.tern-port
+.vscode-test
+*.pid
+*.seed
+*.pid.lock
+.npmrc
+.yarnrc
+.prettierrc.local
+.eslintrc.local
+.editorconfig.local
+*.local
+local.json
+config.local.json
+
+# ============================================
+# MongoDB specific
+# ============================================
+mongodb/
+mongo-data/
+*.bson
+
+# ============================================
+# Security & Audit
+# ============================================
+audit-report.json
+security-audit.json
+*.audit

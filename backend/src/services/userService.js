@@ -2,6 +2,7 @@ const getUserModel = require('../models/userModel');
 const { Token, AuditLog } = require('../models');
 const { hashPassword, verifyPassword } = require('../utils/passwordUtils');
 const { generateAccessToken, generateRefreshToken, hashToken } = require('../utils/jwtUtils');
+const { sendUserVerificationEmail } = require('./emailVerificationService');
 
 /**
  * Register a new user for a client
@@ -86,6 +87,15 @@ const registerUser = async (clientId, userData, ipAddress, userAgent) => {
     user_agent: userAgent
   });
 
+  // Send verification email (fire and forget - don't block registration if email fails)
+  try {
+    await sendUserVerificationEmail(clientId, user.id, user.email, user.name);
+  } catch (emailError) {
+    // Log error but don't fail registration
+    console.error('Failed to send verification email after user registration:', emailError.message);
+    // Registration still succeeds, user can request verification email later
+  }
+
   // Return user data and only accessToken (refreshToken is stored but not returned)
   return {
     user: {
@@ -147,6 +157,11 @@ const loginUser = async (clientId, email, password, ipAddress, userAgent) => {
       user_agent: userAgent
     });
     throw new Error('Invalid email or password');
+  }
+
+  // Check if email is verified
+  if (!user.is_email_verified) {
+    throw new Error('Email not verified. Please verify your email first.');
   }
 
   // Generate tokens
