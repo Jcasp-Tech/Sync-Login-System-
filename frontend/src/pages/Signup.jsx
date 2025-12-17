@@ -147,7 +147,38 @@ export default function Signup() {
                 {message}
               </div>
             )}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form 
+              onSubmit={handleSubmit(onSubmit)} 
+              className="space-y-4" 
+              autoComplete="off" 
+              data-form-type="other"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-dashlane-ignore="true"
+              data-bitwarden-ignore="true"
+            >
+              {/* Hidden dummy fields to trick password managers */}
+              <input
+                type="text"
+                name="fake-username"
+                autoComplete="username"
+                style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none', height: 0, width: 0 }}
+                tabIndex={-1}
+                readOnly
+                aria-hidden="true"
+                value=""
+              />
+              <input
+                type="password"
+                name="fake-password"
+                autoComplete="current-password"
+                style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none', height: 0, width: 0 }}
+                tabIndex={-1}
+                readOnly
+                aria-hidden="true"
+                value=""
+              />
+
               <div className="space-y-2">
                 <Label htmlFor="fullName">
                   Full Name <span className="text-red-500">*</span>
@@ -156,6 +187,15 @@ export default function Signup() {
                   id="fullName"
                   type="text"
                   placeholder="John Doe"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                  }}
                   {...register('fullName', {
                     required: 'Full name is required',
                     minLength: {
@@ -187,6 +227,15 @@ export default function Signup() {
                   id="position"
                   type="text"
                   placeholder="CEO, Owner, Director, etc."
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                  }}
                   {...register('position', {
                     required: 'Position/Title is required',
                     minLength: {
@@ -213,6 +262,15 @@ export default function Signup() {
                   id="email"
                   type="email"
                   placeholder="name@company.com"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                  }}
                   {...register('email', {
                     required: 'Email is required',
                     pattern: {
@@ -240,6 +298,15 @@ export default function Signup() {
                   id="phoneNo"
                   type="tel"
                   placeholder="+1 (555) 123-4567"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                  }}
                   {...register('phoneNo', {
                     required: 'Phone number is required',
                     pattern: {
@@ -266,6 +333,15 @@ export default function Signup() {
                   id="industry"
                   type="text"
                   placeholder="e.g., Technology, Finance, Healthcare"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                  }}
                   {...register('industry', {
                     required: 'Industry is required',
                     minLength: {
@@ -292,6 +368,17 @@ export default function Signup() {
                   id="password"
                   type="password"
                   placeholder="Create a strong password"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  data-form-type="other"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                    e.target.setAttribute('autocomplete', 'new-password')
+                  }}
                   {...register('password', {
                     required: 'Password is required',
                     minLength: {
@@ -323,6 +410,17 @@ export default function Signup() {
                   id="confirmPassword"
                   type="password"
                   placeholder="Confirm your password"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  data-form-type="other"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                    e.target.setAttribute('autocomplete', 'new-password')
+                  }}
                   {...register('confirmPassword', {
                     required: 'Please confirm your password',
                     validate: (value) =>
