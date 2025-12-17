@@ -148,3 +148,76 @@ curl -X DELETE http://localhost:5002/api/v1/client/auth/api-clients/ak_live_your
 5. **Refresh Token** if needed
 6. **Revoke API Access Key** to delete a key
 7. **Logout** when done
+
+---
+
+## Service Auth API Endpoints
+
+### 1. Register User (Service Auth)
+**Endpoint:** `POST /api/v1/service/auth/register`  
+**Access:** Requires Access Key
+
+```bash
+curl -X POST http://localhost:5002/api/v1/service/auth/register \
+  -H "Authorization: AccessKey ak_live_8iX2KMIOOZuYmlla6BUUFTvRsTkr2_E5" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePass123",
+    "name": "John Doe"
+  }'
+```
+
+### 2. Login User (Service Auth)
+**Endpoint:** `POST /api/v1/service/auth/login`  
+**Access:** Requires Access Key
+
+```bash
+curl -X POST http://localhost:5002/api/v1/service/auth/login \
+  -H "Authorization: AccessKey ak_live_8iX2KMIOOZuYmlla6BUUFTvRsTkr2_E5" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePass123"
+  }'
+```
+
+### 3. Get Refresh Token (Service Auth)
+**Endpoint:** `POST /api/v1/service/auth/refresh-token`  
+**Access:** Requires Access Key
+
+```bash
+curl -X POST http://localhost:5002/api/v1/service/auth/refresh-token \
+  -H "Authorization: AccessKey ak_live_8iX2KMIOOZuYmlla6BUUFTvRsTkr2_E5" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accessToken": "YOUR_ACCESS_TOKEN_HERE"
+  }'
+```
+
+### 4. Get User Profile (Service Auth)
+**Endpoint:** `POST /api/v1/service/auth/profile`  
+**Access:** Requires Access Key + Refresh Token
+
+```bash
+curl -X POST http://localhost:5002/api/v1/service/auth/profile \
+  -H "Authorization: AccessKey ak_live_8iX2KMIOOZuYmlla6BUUFTvRsTkr2_E5" \
+  -H "X-Refresh-Token: YOUR_REFRESH_TOKEN_HERE"
+```
+
+**Note:** This endpoint requires both:
+- `Authorization: AccessKey <access_key>` header
+- `X-Refresh-Token: <refreshToken>` header
+
+### 5. Logout User (Service Auth)
+**Endpoint:** `POST /api/v1/service/auth/logout`  
+**Access:** Requires Access Key
+
+```bash
+curl -X POST http://localhost:5002/api/v1/service/auth/logout \
+  -H "Authorization: AccessKey ak_live_8iX2KMIOOZuYmlla6BUUFTvRsTkr2_E5" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
+  }'
+```
