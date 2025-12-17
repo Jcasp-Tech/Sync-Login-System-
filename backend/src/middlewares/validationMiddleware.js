@@ -154,14 +154,14 @@ const validateServiceUserLogin = [
 ];
 
 /**
- * Validation rules for service refresh token
+ * Validation rules for service refresh token (accepts accessToken)
  */
 const validateServiceRefreshToken = [
-  body('refreshToken')
+  body('accessToken')
     .notEmpty()
-    .withMessage('Refresh token is required')
+    .withMessage('Access token is required')
     .isString()
-    .withMessage('Refresh token must be a string')
+    .withMessage('Access token must be a string')
 ];
 
 /**

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../../controllers/userController');
-const { validateAccessKey } = require('../../middlewares/accessKeyMiddleware');
+const { validateAccessKey, validateAccessKeyAndRefreshToken } = require('../../middlewares/accessKeyMiddleware');
 const {
   validateServiceUserRegister,
   validateServiceUserLogin,
@@ -95,12 +95,12 @@ router.post(
 
 /**
  * @route   POST /api/v1/service/auth/profile
- * @desc    Get user profile (requires access key)
- * @access  Private (Access key required)
+ * @desc    Get user profile (requires access key and refresh token)
+ * @access  Private (Access key and refresh token required)
  */
 router.post(
   '/profile',
-  validateAccessKey, // Validate access key first
+  validateAccessKeyAndRefreshToken, // Validate both access key and refresh token
   userController.getProfile
 );
 
