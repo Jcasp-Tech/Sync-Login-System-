@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { useNavigate, Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,7 @@ export default function Login() {
   const navigate = useNavigate()
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const passwordInputRef = useRef(null)
 
   const {
     register,
@@ -144,13 +145,55 @@ export default function Login() {
                 {message}
               </div>
             )}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form 
+              onSubmit={handleSubmit(onSubmit)} 
+              className="space-y-4" 
+              autoComplete="off"
+              data-form-type="other"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-dashlane-ignore="true"
+              data-bitwarden-ignore="true"
+            >
+              {/* Hidden dummy fields to trick password managers - placed BEFORE real fields */}
+              <input
+                type="text"
+                name="fake-username"
+                autoComplete="username"
+                style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none', height: 0, width: 0 }}
+                tabIndex={-1}
+                readOnly
+                aria-hidden="true"
+                value=""
+              />
+              <input
+                type="password"
+                name="fake-password"
+                autoComplete="current-password"
+                style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none', height: 0, width: 0 }}
+                tabIndex={-1}
+                readOnly
+                aria-hidden="true"
+                value=""
+              />
+              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email-field"
                   type="email"
                   placeholder="name@example.com"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  data-form-type="other"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                  }}
                   {...register('email', {
                     required: 'Email is required',
                     pattern: {
@@ -170,8 +213,25 @@ export default function Login() {
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
+                  name="password-field"
                   type="password"
                   placeholder="Enter your password"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-dashlane-ignore="true"
+                  data-bitwarden-ignore="true"
+                  data-form-type="other"
+                  ref={passwordInputRef}
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute('readonly')
+                    e.target.setAttribute('autocomplete', 'new-password')
+                    e.target.setAttribute('data-lpignore', 'true')
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.setAttribute('autocomplete', 'new-password')
+                  }}
                   {...register('password', {
                     required: 'Password is required',
                     minLength: {
